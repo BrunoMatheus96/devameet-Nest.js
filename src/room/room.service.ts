@@ -88,6 +88,12 @@ export class RoomService {
         await this.positionModel.updateMany({user, meet}, {muted: dto.muted});
     }
 
+    async findPreviousUserPosition(link: string, userId: string) {
+        const meet = await this.meetModel.findOne({ link });
+    
+        return await this.positionModel.find({ meet: meet._id, user: userId });
+      }
+
     async _getMeet(link: string) {
         const meet = await this.meetModel.findOne({ link });
         if (!meet) {

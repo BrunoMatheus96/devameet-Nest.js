@@ -53,13 +53,34 @@ export class RoomGateway implements OnGatewayInit, OnGatewayDisconnect {
     if (!existingOnSocket) {
       this.activeSockets.push({ room: link, id: client.id, userId });
 
+      const previousPosition = await this.service.findPreviousUserPosition(
+        link,
+        userId,
+      );
+      const usersInRoom = await this.service.listUsersPositionByLink(link);
+
+      let x = 2;
+      let y = 2;
+      if (previousPosition.length > 0) {
+        x = previousPosition[0].x;
+        y = previousPosition[0].y;
+      }
+
       const dto = {
         link,
         userId,
-        x: 1,
-        y: 1,
+        x: x,
+        y: y,
+        inRoom: true,
         orientation: 'front'
       } as UpdateUserPositionDto
+
+      usersInRoom.map(user => {
+        if (user.x === dto.x && user.y === dto.y) {
+          dto.x++;
+          dto.y++;
+        }
+      })
 
       await this.service.updateUserPosition(client.id, dto);
 
