@@ -1,0 +1,35 @@
+## Instalação e criação do projeto
+```bash
+npm i -g @nestjs/cli
+nest new devameet-nest-js
+```
+
+## Rodar o projeto:
+```bash
+npm run start:dev
+```
+
+## Arquivos
+- Diretório test: Contém os testes unitários end to end da aplicação;
+- Arquivo tsconfig.json: Contém as configurações do compilador do Typescript;
+- Arquivos .spec.ts: Contém o teste unitário de um arquivo especificadamente na compilação ao contrário do end to end;
+
+
+## Estrutura do projeto
+- main.ts, esse arquivo importa a Factory do Nest assim como nosso módulo principal e inicial a aplicação na porta 3000
+- module.ts é o módulo principal da nossa aplicação (entenda módulo como um componente, algo que pode ser reutilizado) e nele definimos os controllers e os serviços que vamos utilizar
+- controller.ts já é realmente no controller das rotas http é nele onde definimos nossos métodos e quais HTTP Method vão dispara-los (e perceba que no método chamamos um service)
+- service.ts é a regra de negócio propriamente dita, onde vamos efetuar as lógicas e demais conexões se necessária
+
+## Dependências
+- Com o class-validator podemos usar decorators para validar nossos campos e com o class-transformer vamos transformar dados de acordo com a nossa necessidade.
+```bash
+npm i --save class-validator class-transformer
+```
+
+## Observações
+- No Nest isolamos os arquivos da pasta por regra de negócio 
+- Auth é a pasta de autenticação e tudo que for sobre isso estará dentro dessa pasta
+- Pasta helpers é a pasta para mensagens de validçação'
+- O DTO é responsável pela navegação dos dados que não necessáriamente é do banco. como Requisições
+- Prop é a propriedade do schema
