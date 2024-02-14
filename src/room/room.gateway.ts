@@ -59,8 +59,8 @@ export class RoomGateway implements OnGatewayInit, OnGatewayDisconnect {
       );
       const usersInRoom = await this.service.listUsersPositionByLink(link);
 
-      let x = 2;
-      let y = 2;
+      let x = 1;
+      let y = 1;
       if (previousPosition.length > 0) {
         x = previousPosition[0].x;
         y = previousPosition[0].y;
