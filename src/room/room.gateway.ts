@@ -5,6 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { JoinRoomDto } from './dtos/joinroom.dto';
 import { UpdateUserPositionDto } from './dtos/updateposition.dto';
 import { ToglMuteDto } from './dtos/toglMute.dto';
+import { inRoom } from './dtos/inRoom.dto';
 
 type ActiveSocketType = {
   room: String;
@@ -33,7 +34,13 @@ export class RoomGateway implements OnGatewayInit, OnGatewayDisconnect {
       socket => socket.id !== client.id
     );
 
-    await this.service.deleteUsersPosition(client.id);
+    const dto = {
+      link: existingOnSocket.room,
+      userId: existingOnSocket.userId,
+      inRoom: false
+    } as inRoom;
+    await this.service.deleteUsersPosition(client.id, dto);
+
     client.broadcast.emit(`${existingOnSocket.room}-remove-user`, { socketId: client.id });
 
     this.logger.debug(`Client: ${client.id} disconnected`);
@@ -53,17 +60,27 @@ export class RoomGateway implements OnGatewayInit, OnGatewayDisconnect {
     if (!existingOnSocket) {
       this.activeSockets.push({ room: link, id: client.id, userId });
 
+      // Verifica se o usuário já tem uma posição anterior na sala
       const previousPosition = await this.service.findPreviousUserPosition(
         link,
         userId,
       );
-      const usersInRoom = await this.service.listUsersPositionByLink(link);
 
       let x = 1;
       let y = 1;
       if (previousPosition.length > 0) {
+        // Usa a posição anterior do usuário se estiver disponível
         x = previousPosition[0].x;
         y = previousPosition[0].y;
+      } else {
+        // Caso contrário, gera uma nova posição aleatória
+        const usersInRoom = await this.service.listUsersPositionByLink(link);
+        const occupiedPositions = usersInRoom.map(user => ({ x: user.x, y: user.y }));
+        while (occupiedPositions.some(pos => pos.x === x && pos.y === y)) {
+          // Gera novas posições até encontrar uma posição não ocupada
+          x = Math.floor(Math.random() * 8) + 1;
+          y = Math.floor(Math.random() * 8) + 1;
+        }
       }
 
       const dto = {
@@ -75,12 +92,14 @@ export class RoomGateway implements OnGatewayInit, OnGatewayDisconnect {
         orientation: 'front'
       } as UpdateUserPositionDto
 
-      usersInRoom.map(user => {
+
+      /*const usersInRoom = await this.service.listUsersPositionByLink(link);
+      usersInRoom.map((user) => {
         if (user.x === dto.x && user.y === dto.y) {
-          dto.x++;
-          dto.y++;
+          dto.x = Math.floor(Math.random() * 8) + 1;  // Isso impede que nossa posição extrapole a matriz 8x8 definida na regra de negócio 
+          dto.y = Math.floor(Math.random() * 8) + 1;
         }
-      })
+      });*/
 
       await this.service.updateUserPosition(client.id, dto);
 
