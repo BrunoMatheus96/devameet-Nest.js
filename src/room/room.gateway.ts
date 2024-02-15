@@ -65,6 +65,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayDisconnect {
         link,
         userId,
       );
+
       let x = 1;
       let y = 1;
       if (previousPosition.length > 0) {
