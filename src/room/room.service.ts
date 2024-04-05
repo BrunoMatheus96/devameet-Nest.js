@@ -12,6 +12,7 @@ import { RoomMessagesHelper } from './helpers/roommessages.helper';
 import { UpdateUserPositionDto } from './dtos/updateposition.dto';
 import { ToglMuteDto } from './dtos/toglMute.dto';
 import { inRoom } from './dtos/inRoom.dto';
+import { ToglViewDto } from './dtos/toglView.dto';
 
 @Injectable()
 export class RoomService {
@@ -123,6 +124,15 @@ export class RoomService {
     const user = await this.userService.getUserById(dto.userId);
 
     await this.positionModel.updateMany({ user, meet }, { muted: dto.muted });
+  }
+
+  async updateUserView(dto: ToglViewDto) {
+    this.logger.debug(`updateUserView - ${dto.link} - ${dto.userId}`);
+
+    const meet = await this._getMeet(dto.link);
+    const user = await this.userService.getUserById(dto.userId);
+
+    await this.positionModel.updateMany({ user, meet }, { viewed: dto.viewed });
   }
 
   async findPreviousUserPosition(link: string, userId: string) {

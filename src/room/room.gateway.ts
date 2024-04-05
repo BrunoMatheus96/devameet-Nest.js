@@ -6,6 +6,7 @@ import { JoinRoomDto } from './dtos/joinroom.dto';
 import { UpdateUserPositionDto } from './dtos/updateposition.dto';
 import { ToglMuteDto } from './dtos/toglMute.dto';
 import { inRoom } from './dtos/inRoom.dto';
+import { ToglViewDto } from './dtos/toglView.dto';
 
 type ActiveSocketType = {
   room: String;
@@ -135,6 +136,14 @@ export class RoomGateway implements OnGatewayInit, OnGatewayDisconnect {
   async handleToglMute(_: Socket, payload: ToglMuteDto) {
     const { link } = payload;
     await this.service.updateUserMute(payload);
+    const users = await this.service.listUsersPositionByLink(link);
+    this.wss.emit(`${link}-update-user-list`, { users });
+  }
+
+  @SubscribeMessage('toggl-view-user')
+  async handleToglView(_: Socket, payload: ToglViewDto) {
+    const { link } = payload;
+    await this.service.updateUserView(payload);
     const users = await this.service.listUsersPositionByLink(link);
     this.wss.emit(`${link}-update-user-list`, { users });
   }
